@@ -1,0 +1,32 @@
+---
+title: "Assignment 1 Report"
+author: "Nicholas Tyler"
+date: "January 23, 2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Overview of program flow
+
+The script for this project, for each of the listed github project, follows the general steps of:
+
+1. Clone the project to a designated directory
+2. Extract the commit metadata
+3. Extract the modified files data
+4. Cleanup the cloaned directory
+ 
+The project is cloned down using the standard git clone command. The commit metadata and the modified files data are scraped from the output of the git log command with arguments to prettify the stout. Cleanup is done with rm -rf
+
+The main flow of the script is multithreaded, with each individual thread running the above flow for one project. The implimentation is limited to 5 threads but could be expanded to use more.
+
+## Key stats for the project
+
+Runtime to process repo list: ~4.5 hours
+
+Size of datasets pulled from github: ~2.5G
+
+
+ 
