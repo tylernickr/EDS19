@@ -1,7 +1,6 @@
 from subprocess import run
 from os import getcwd, path, chdir
 from contextlib import contextmanager
-from threading import Thread, active_count
 
 GIT_ROOT = 'https://github.com/'
 CLONE_ROOT = 'clones/'
@@ -28,11 +27,11 @@ def cleanupProject(project):
     run(['rm', '-rf', cloneDir])
 
 
-def getCommitMetadata(project):
+def getCommitMetadata(repoOwner, project):
     cloneDir = CLONE_ROOT + project
-    with open('commit_data/' + project + '.csv', 'w') as ouputFile:
+    with open('commit_data/' + repoOwner + '#####' + project + '.csv', 'w') as ouputFile:
         with cd(cloneDir):
-            run(['git', 'log', '--pretty=format:\'"%H","%an","%ae","%ad","%cn","%ce","%ct"\''], stdout=ouputFile)
+            run(['git', 'log', '--pretty=format:%H,,%an,,%ae,,%ad,,%cn,,%ce,,%ct'], stdout=ouputFile)
 
 
 def getModifiedFiles(project):
@@ -51,14 +50,14 @@ def getModifiedFiles(project):
                     commithash = line
                 else:
                     added, deleted, modpath = line.split(maxsplit=2)
-                    print('"' + commithash + '",' + str(added) + ',' + str(deleted) + ',"' + modpath + '"', file=outputFile)
+                    print(commithash + ',,' + str(added) + ',,' + str(deleted) + ',,' + modpath, file=outputFile)
 
 
 def processProject(repo_owner, project):
     print('Repo Owner: ' + repo_owner + '; Project: ' + project)
     cloneProject(repo_owner, project)
     try:
-        getCommitMetadata(project)
+        getCommitMetadata(repoOwner, project)
         getModifiedFiles(project)
         cleanupProject(project)
     except:
@@ -67,16 +66,9 @@ def processProject(repo_owner, project):
 
 if __name__ == '__main__':
     projects = []
-    done = 0
-    for line in open('resource/repos.list'):
+    for line in open('resource/repos.list.subset'):
         repoOwner, project = line[:-1].split('/')
         projects.append((repoOwner, project))
 
-        while active_count() >= 5:
-            pass
-
-        Thread(target=processProject, args=(repoOwner, project)).start()
-        done += 1
-
-    print(active_count())
+        processProject(repoOwner, project)
 
