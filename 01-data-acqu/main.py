@@ -1,9 +1,12 @@
 from subprocess import run
-from os import getcwd, path, chdir
+from os import getcwd, path, chdir, mkdir
 from contextlib import contextmanager
+from sys import argv
 
 GIT_ROOT = 'https://github.com/'
 CLONE_ROOT = 'clones/'
+COMMIT_DATA_DIR = 'commit_data/'
+MOD_FILES_ROOT = 'modified_files_data/'
 
 @contextmanager
 def cd(newdir):
@@ -29,18 +32,18 @@ def cleanupProject(project):
 
 def getCommitMetadata(repoOwner, project):
     cloneDir = CLONE_ROOT + project
-    with open('commit_data/' + repoOwner + '#####' + project + '.csv', 'w') as ouputFile:
+    with open(COMMIT_DATA_DIR + repoOwner + '#####' + project + '.csv', 'w') as ouputFile:
         with cd(cloneDir):
             run(['git', 'log', '--pretty=format:%H,,%an,,%ae,,%ad,,%cn,,%ce,,%ct'], stdout=ouputFile)
 
 
 def getModifiedFiles(project):
     cloneDir = CLONE_ROOT + project
-    with open('modified_files_data/' + project + '.csv', 'w') as outputFile:
+    with open(MOD_FILES_ROOT + project + '.csv', 'w') as outputFile:
         with cd(cloneDir):
-            with open('temporary.nick', 'w') as tmpFile:
+            with open('temporary.f', 'w') as tmpFile:
                 run(['git', 'log', '--pretty=format:🐱%n%H', '--numstat'], stdout=tmpFile)
-            for line in open('temporary.nick'):
+            for line in open('temporary.f'):
                 line = line[:-1]
                 if line == '🐱':
                     commithash = ''
@@ -65,8 +68,15 @@ def processProject(repo_owner, project):
 
 
 if __name__ == '__main__':
+    repo_list = argv[1]
     projects = []
-    for line in open('resource/repos.list.subset'):
+    run(['rm', '-rf', CLONE_ROOT])
+    mkdir(CLONE_ROOT)
+    run(['rm', '-rf', COMMIT_DATA_DIR])
+    mkdir(COMMIT_DATA_DIR)
+    run(['rm', '-rf', MOD_FILES_ROOT])
+    mkdir(MOD_FILES_ROOT)
+    for line in open(repo_list):
         repoOwner, project = line[:-1].split('/')
         projects.append((repoOwner, project))
 

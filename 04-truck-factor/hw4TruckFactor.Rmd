@@ -1,0 +1,62 @@
+---
+title: 'HW4: Truck Factor'
+author: "Nicholas Tyler"
+date: "February 26, 2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(DBI)
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+library(dbplyr)
+```
+
+The techniques used in this report for data acquisition, cleaning, and population are taken from the earlier assignments using the methods used in those assignments. The repository list is pulled from github, and will pull in descending order of stars on the repository. This means that if the report is run for 10 repositories, it will use the 10 most starred repositories on github.
+
+Data storage and population is done via a MYSQL database, using a schema listed in the data acquisition folder of the related repository. The data is populated via a python script which makes use of the mysqlimport command line utility.
+
+I also elected to perform the actual calculation of truck factors in python. This decision was driven largely by the nature of calculation truck factors, where you're looping over the data rather then performing a set number of operations on dataframes. The solution would likely need to be moved in the database as scale increases.
+
+```{r, include=FALSE}
+system("python3 ../03-acquire/top_repositories.py 25 repos.txt")
+```
+
+```{r, include=FALSE}
+system("python3 ../01-data-acqu/main.py repos.txt")
+```
+
+```{r, include=FALSE}
+system("python3 ../02-schema/populate/main.py username password")
+```
+
+```{r, include=FALSE}
+system("python3 csv_from_db.py raw_data.txt")
+```
+
+Everything above this line is used to generate a csv file used to run the truck factor calculation. If you have your own csv file, it can be substituted by running only the lines below, replacing "raw_data.txt" with the path of your csv. 
+
+```{r, include=FALSE}
+system("python3 truck_factor.py raw_data.txt file_tfs.txt proj_tfs.txt")
+```
+
+```{r}
+file_factors <- read_csv("file_tfs.txt")
+project_factors <- read_csv("proj_tfs.txt")
+```
+
+```{r}
+ggplot(file_factors) + geom_histogram(aes(x=factor), binwidth = 1)
+```
+ The above chart shows the distribution of the truck factors of each of the individual files analyzed. The chart is highly concentrated around low values (primarily 1 and 2), showing that the majority of files have low truck factors.
+ 
+```{r}
+ggplot(project_factors) + geom_histogram(aes(x=factor), binwidth = 1)
+```
+
+The above chart shows a similar distribution with the majority of projects having a truck factor of one, showing that the distribution is heavily weighted at a low truck factor.

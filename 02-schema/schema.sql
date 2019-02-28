@@ -1,8 +1,8 @@
-DROP database if exists github;
+DROP database if exists github2;
 
-CREATE database github;
+CREATE database github2;
 
-USE github;
+USE github2;
 
 DROP TABLE IF EXISTS github_user;
 
@@ -35,4 +35,14 @@ CREATE table commit
     FOREIGN KEY project_key(projectID) REFERENCES project(id),
     FOREIGN KEY author_key(author) REFERENCES github_user(username),
     FOREIGN KEY committer_key(committer) REFERENCES github_user(username)
-);
+)
+ENGINE = MYISAM;
+
+CREATE table file_modification
+(
+	hash	char(40)	 NOT NULL,
+    file	varchar(560) NOT NULL,
+    added   int			 NOT NULL,
+    deleted int			 NOT NULL
+)
+ENGINE = MYISAM;
